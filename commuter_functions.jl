@@ -87,16 +87,16 @@ function create_spawn_events!(spawn_data_file_path, station_dict, start_spawn_ti
 				continue
 			end
 
-			new_event = Event(
-					new_time,
-					spawn_commuter!,
-					Dict(
-							:time => new_time,
-							:station => i_id,
-							:target => j_id
-						)
-				)
-			push!(events, new_event)
+			# new_event = Event(
+			# 		new_time,
+			# 		spawn_commuter!,
+			# 		Dict(
+			# 				:time => new_time,
+			# 				:station => i_id,
+			# 				:target => j_id
+			# 			)
+			# 	)
+			# push!(events, new_event)
 		end 
 	end 
 

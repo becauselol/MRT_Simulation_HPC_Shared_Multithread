@@ -1,18 +1,17 @@
-using Test
-include("../classes.jl")
-include("../station_functions.jl")
+FW = true 
+BW = false
 
-s = Station(1, "test", [])
+s = Station(1, "1", String[])
 s.neighbours[1000] = Dict()
-s.neighbours[1000][true] = [2, 3]
+s.neighbours[1000][FW] = [2, 3]
 
 @testset "Get Neighbour Functions" begin
 	@testset "Get ID" begin
-		@test get_neighbour_id(s, 1000, true) == 2
-		@test get_neighbour_id(s, 1000, false) == nothing
+		@test get_neighbour_id(s, 1000, FW) == 2
+		@test get_neighbour_id(s, 1000, BW) == nothing
 	end;
 	@testset "Get Weight" begin
-		@test get_neighbour_weight(s, 1000, true) == 3
-		@test get_neighbour_weight(s, 1000, false) == nothing
+		@test get_neighbour_weight(s, 1000, FW) == 3
+		@test get_neighbour_weight(s, 1000, BW) == nothing
 	end;
 end;

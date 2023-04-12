@@ -15,58 +15,19 @@ function get_neighbour_weight(station, line_code, direction)
 end
 
 
-function add_commuter_to_station!(time, metro, station, commuter)
-	if !haskey(station.commuters, "waiting")
-		station.commuters["waiting"] = []
+function add_commuter_to_station(station_commuters, type, commuter)
+	commuter_vector = Commuter[]
+	if haskey(station_commuters, type)
+		commuter_vector = station_commuters[type]
 	end
 
-	push!(station.commuters["waiting"], commuter)
+	push!(commuter_vector, commuter)
 
-	station_count = Station_Commuter_Count(station.station_id, time, "post_spawn", get_number_commuters(station))
-
-	return Dict(
-			"station_count" => station_count
-		)
+	return commuter_vector
 end
 
-function remove_commuter_from_station!(time, metro, station)
-	travel_time_update = Inter_Station_Time_Update(station.station_id, Dict())
-	perc_wait_time_update = Inter_Station_Time_Update(station.station_id, Dict())
-	
-	if !haskey(station.commuters, "terminating")
-		station.commuters["terminating"] = []
-	end
-
-	for commuter in station.commuters["terminating"]
-		# we need to update travel time
-		origin = commuter.origin
-
-		travel_time = time - commuter.spawn_time
-
-		if !haskey(travel_time_update.update, origin)
-			travel_time_update.update[origin] = []
-		end
-		push!(travel_time_update.update[origin], travel_time)
-
-		perc_wait = round(commuter.total_wait_time/travel_time, digits=2)
-
-		if !haskey(perc_wait_time_update.update, origin)
-			perc_wait_time_update.update[origin] = []
-		end
-		push!(perc_wait_time_update.update[origin], perc_wait)
-	end
-
-	@debug "time $(round(time; digits=2)): terminating $(size(station.commuters["terminating"])[1]) commuters at Station $(station.station_id)"
-
-	station.commuters["terminating"] = []
-
-	station_count = Station_Commuter_Count(station.station_id, time, "post_terminate", get_number_commuters(station))
-
-	return Dict(
-			"travel_time" => travel_time_update,
-			"perc_wait_time" => perc_wait_time_update,
-			"station_count" => station_count
-		)
+function terminate_commuters_from_station()
+	return []
 end
 
 function board_commuters!(time, metro, train, station)

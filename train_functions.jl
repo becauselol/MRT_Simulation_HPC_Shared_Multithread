@@ -18,18 +18,18 @@ function create_period_train_placement_events(line_code, line_duration, period, 
 	period = line_duration / length(result["trains"])
 	time = start_time
 	for train_id in keys(result["trains"])
-		new_event = Event(
-			time,
-			train_reach_station!,
-			Dict(
-					:time => time,
-					:train => train_id,
-					:station => depot_id
-				)
-			)
-		time += period
+		# new_event = Event(
+		# 	time,
+		# 	train_reach_station!,
+		# 	Dict(
+		# 			:time => time,
+		# 			:train => train_id,
+		# 			:station => depot_id
+		# 		)
+		# 	)
+		# time += period
 
-		push!(result["events"], new_event)
+		# push!(result["events"], new_event)
 	end 
 
 
