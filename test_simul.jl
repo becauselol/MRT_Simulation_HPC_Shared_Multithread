@@ -3,6 +3,7 @@
 ###
 using Logging
 using DataFrames
+using Distributed, SharedArrays
 
 include("simul_functions.jl")
 include("construction_functions.jl")

@@ -1,12 +1,16 @@
+using SharedArrays
+
 struct Event
 	time::Float64
-	fun::Any # the function to execute
-	params::Dict
+	event_type::Int64 # effectively decides the type of function we will use
+	station::Int64 # set of parameters any function will use
+	target::Int64
+	train::Int64
 end
 
-mutable struct Commuter
-	origin::String # origin station id
-	target::String # path to take
+struct Commuter
+	origin::Int64 # origin station id
+	target::Int64 # path to take
 	state::Bool # state of commuter (True means waiting false means moving)
 	spawn_time::Float64 # time it was spawned at
 	wait_start::Float64 # time it started waiting for the next train
@@ -19,7 +23,7 @@ mutable struct Train
 	direction::String
 	movement::Bool # whether it is moving
 	capacity::Int64
-	commuters::Dict{String, Vector{Commuter}} # Dictionary, key: station to alight, valu: List of commuters
+	commuters::Dict{String, SharedVector{Commuter}} # Dictionary, key: station to alight, valu: List of commuters
 end
 
 mutable struct Station

@@ -192,7 +192,7 @@ function simulate!(max_time, metro, event_queue, data_store)
 		)
 	curr_min = convert(Int64, floor(event_queue[1].time/60))
 	@info "$(now()): start time is $curr_min"
-
+	
 	events_simulated = 0
 	while event_queue[1].time < max_time
 		# release the most recent event
