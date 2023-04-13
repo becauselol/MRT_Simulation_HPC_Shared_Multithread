@@ -9,10 +9,10 @@ function simulate_timestep!()
 
 end
 
-function get_event_vector_count(event_vector)
+function get_shared_vector_count(shared_vector)
 	count = 0
-	for event in event_vector
-		if event.is_real
+	for item in shared_vector
+		if item.is_real
 			count += 1
 		end 
 	end 
@@ -28,7 +28,7 @@ function update_event_queue!(queue, buffer, station_id)
 	# check what the buffer has
 
 	# if there are events in the buffer
-	if get_event_vector_count(buffer[:,station_id]) > 0
+	if get_shared_vector_count(buffer[:,station_id]) > 0
 		# update the event queue
 		for (idx, event) in enumerate(buffer[:,station_id])
 			if event.is_real

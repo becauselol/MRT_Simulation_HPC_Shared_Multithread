@@ -51,7 +51,7 @@ struct Commuter
 	is_real::Bool # just check if it is placeholder
 
 	function Commuter()
-		return new(0, 0, false, 0.0, 0.0, 0.0, false)
+		return new(0, 0, 0.0, 0.0, 0.0, false)
 	end 
 
 	function Commuter(origin::Int64, target::Int64, spawn_time::Float64, wait_start::Float64, total_wait_time::Float64 )
@@ -63,15 +63,13 @@ mutable struct Train
 	train_id::Int64
 	line::Int64
 	direction::Bool
-	movement::Bool # whether it is moving
 	capacity::Int64 # kinda unnecessary, since commuters is fixed size
 	commuters::SharedVector{Commuter}
-	function Train(train_id::Int64, line::Int64, direction::Bool, movement::Bool, capacity::Int64)
+	function Train(train_id::Int64, line::Int64, direction::Bool, capacity::Int64)
 		return new(
 			train_id,
 			line,
 			direction,
-			movement,
 			capacity,
 			SharedVector{Commuter}(capacity)
 			)
@@ -81,7 +79,6 @@ mutable struct Train
 			train_id,
 			line,
 			true,
-			false,
 			capacity,
 			SharedVector{Commuter}(capacity)
 			)

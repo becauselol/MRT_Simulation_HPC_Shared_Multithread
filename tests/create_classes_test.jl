@@ -22,7 +22,7 @@
 		@sync for i in workers()
 			@async begin
 				train_dict[i] = remotecall_fetch(Train, i, i, i, capacity)
-				train_dict[i + nworkers()] = remotecall_fetch(Train, i, i, i, false, false, capacity)
+				train_dict[i + nworkers()] = remotecall_fetch(Train, i, i, i, false, capacity)
 			end
 		end
 
@@ -32,4 +32,5 @@
 			@test train_dict[i + nworkers()].train_id == i
 		end 
 	end
+
 end

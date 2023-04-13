@@ -30,69 +30,52 @@ function terminate_commuters_from_station()
 	return []
 end
 
-function board_commuters!(time, metro, train, station)
-	train_number = get_number_commuters(train)
-	train_count = Train_Commuter_Count(station.station_id, time, "pre_board", train_number)
-	wait_time_update = Wait_Time_Update(station.station_id, [])
+function get_target_lines(current_id, target_id, paths)
+	if !haskey(paths, current_id)
+		return []
+	end 
 
-	line = train.line
-	direction = train.direction
-	line_direction = line * "_" * direction
+	if !haskey(paths[current_id], target_id)
+		return []
+	end 
 
-	if !haskey(station.commuters, line_direction)
-		station.commuters[line_direction] = []
-	end
+	return keys(paths[current_id][target_id])
+end
 
-	board_count = 0
+function board_commuters!(train, station, paths)
 
-	board_indexes = []
+	station_commuters = station.commuters["waiting"]
 
-	if !(haskey(station.commuters, "waiting"))
-		station.commuters["waiting"] = []
-		return Dict()
-	end
+	leftover_commuters = Commuter[]
+	if size(station_commuters) == 0
+		return station_commuters
+	end 
 
-	for (i, commuter) in enumerate(station.commuters["waiting"])
-		if train_number + board_count > train.capacity
-			break
+	# check for each commuter do they board
+	# the line_direction > 0 if FW direction and < 0 if opposite direction
+	line_direction = train.line * ((-1)^(!train.direction))
+
+	train_capacity = get_shared_vector_count(train.commuters)
+
+	for commuter in station_commuters
+		if train_capacity >= train.capacity
+			push!(leftover_commuters, commuter)
+			continue
 		end
+		# if it is the train they want to board
 
-		wait_time = time - commuter.wait_start
-		push!(wait_time_update.update, wait_time)
+		commuter_target_lines = get_target_lines(station.station_id, commuter.target, paths)
 
-		# add to commuters wait time
-		commuter.total_wait_time += wait_time
+		if line_direction in commuter_target_lines
+			train_capacity += 1
+			train.commuters[train_capacity] = commuter
 
-		options = keys(metro.paths[station.station_id][commuter.target])
+		else
+			push!(leftover_commuters, commuter)
 
-		if line_direction in options
-			push!(board_indexes, i)
-		end
-		board_count += 1
-	end
-	
-	for i in reverse(board_indexes)
-		commuter = splice!(station.commuters["waiting"], i)
-
-		alight_choices = metro.paths[station.station_id][commuter.target][line_direction]
-		choice = rand(alight_choices)
-
-		if !haskey(train.commuters, choice)
-			train.commuters[choice] = []
 		end 
-
-		push!(train.commuters[choice], commuter)
 	end
-
-	@debug "time $(round(time; digits=2)): $board_count Commuters boarding Train $(train.train_id) at Station $(station.station_id)"
-
-	station_count = Station_Commuter_Count(station.station_id, time, "post_board", get_number_commuters(station))
-
-	return Dict(
-			"train_count" => train_count,
-			"station_count" => station_count,
-			"wait_time" => wait_time_update
-		)
+	return leftover_commuters
 end
 
 function alight_commuters!(time, metro, train, station)
