@@ -30,7 +30,7 @@ function terminate_commuters_from_station()
 	return []
 end
 
-function get_target_lines(current_id, target_id, paths)
+function get_target_boarding_lines(current_id, target_id, paths)
 	if !haskey(paths, current_id)
 		return []
 	end 
@@ -64,7 +64,7 @@ function board_commuters!(train, station, paths)
 		end
 		# if it is the train they want to board
 
-		commuter_target_lines = get_target_lines(station.station_id, commuter.target, paths)
+		commuter_target_lines = get_target_boarding_lines(station.station_id, commuter.target, paths)
 
 		if line_direction in commuter_target_lines
 			train_capacity += 1
@@ -78,42 +78,50 @@ function board_commuters!(train, station, paths)
 	return leftover_commuters
 end
 
-function alight_commuters!(time, metro, train, station)
-	train_count = Train_Commuter_Count(station.station_id, time, "pre_alight", get_number_commuters(train))
+function get_target_alighting_station(current_id, target_id, line_direction, paths)
+	if !haskey(paths, current_id)
+		return nothing
+	end 
 
-	alight_count = 0
+	if !haskey(paths[current_id], target_id)
+		return nothing 
+	end 
 
-	if !haskey(train.commuters, station.station_id)
-		train.commuters[station.station_id] = []
-	end
+	if !haskey(paths[current_id][target_id], line_direction)
+		return nothing 
+	end 
 
-	if !haskey(station.commuters, "terminating")
-		station.commuters["terminating"] = []
-	end
+	return paths[current_id][target_id][line_direction]
+end
 
-	while size(train.commuters[station.station_id])[1] > 0
-		commuter = popfirst!(train.commuters[station.station_id])
-		commuter.wait_start = time
+function alight_commuters!(train, station, paths)
+	waiting_commuters = Commuter[]
+	terminating_commuters = Commuter[]
 
-		if commuter.target == station.station_id
-			push!(station.commuters["terminating"], commuter)
- 		else 
- 			if !haskey(station.commuters, "waiting")
- 				station.commuters["waiting"] = []
- 			end
- 			push!(station.commuters["waiting"], commuter)
+	current_id = station.station_id
+	line_direction = train.line * ((-1)^(!train.direction))
+
+	train_slot = 1
+
+	for commuter in train.commuters 
+		if commuter.target == current_id
+			push!(terminating_commuters, commuter)
+			continue
+		end 
+
+		target_boarding_lines = get_target_boarding_lines(current_id, commuter.target, paths)
+		if !(line_direction in target_boarding_lines)
+			push!(waiting_commuters, commuter)
+			continue
 		end
+		train.commuters[train_slot] = commuter 
+		train_slot += 1
+	end 
 
-		alight_count += 1
-	end
+	for i in train_slot:train.capacity 
+		train.commuters[i] = Commuter()
+	end 
 
-	@debug "time $(round(time; digits=2)): $alight_count Commuters alighting Train $(train.train_id) at Station $(station.station_id)"
-	
-	station_count = Station_Commuter_Count(station.station_id, time, "post_alight", get_number_commuters(station))
-
-	return Dict(
-			"train_count" => train_count,
-			"station_count" => station_count
-		)
+	return waiting_commuters, terminating_commuters
 end
 
