@@ -4,12 +4,12 @@ if nprocs() == 1
 	addprocs(3)
 end 
 
-@everywhere using Test, SharedArrays, DataFrames
-@everywhere include("../classes.jl")
-@everywhere include("../station_functions.jl")
-@everywhere include("../classes.jl")
-@everywhere include("../simul_functions.jl")
-@everywhere include("../heap_functions.jl")
+@everywhere using Test, SharedArrays, DataFrames, .Threads
+@everywhere include("../src/classes.jl")
+@everywhere include("../src/station_functions.jl")
+@everywhere include("../src/classes.jl")
+@everywhere include("../src/simul_functions.jl")
+@everywhere include("../src/heap_functions.jl")
 
 include("station_neighbour_tests.jl")
 include("create_classes_test.jl")

@@ -96,11 +96,11 @@ end
 			station_dict[3].commuters["waiting"] = add_commuter_to_station(station_dict[3].commuters, "waiting", commuter)
 		end
 
-		@sync for i in workers()
+		@sync @threads for i in 2:4
 			@async station_dict[i-1].commuters["waiting"] = remotecall_fetch(board_commuters!, i, train_dict[i-1], station_dict[i-1], paths)
 		end
 
-		for i in 1:3
+		for i in 1:3 
 			@test size(station_dict[i].commuters["waiting"])[1] == 0
 			@test get_shared_vector_count(train_dict[i].commuters) == 3
 		end 

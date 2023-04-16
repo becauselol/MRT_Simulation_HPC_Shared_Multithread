@@ -6,7 +6,12 @@ include("data_store_functions.jl")
 
 
 function simulate_timestep!()
+	# for all stations we try spawn event
 
+	# we check the train buffer for any events to process
+	# process them accordingly
+
+	# we then just terminate at the station
 end
 
 function get_shared_vector_count(shared_vector)
