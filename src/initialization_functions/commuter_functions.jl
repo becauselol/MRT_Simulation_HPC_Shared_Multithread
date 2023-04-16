@@ -6,9 +6,7 @@ function process_spawn_rate!(spawn_data_file_path, station_dict)
 
 	for row in spawn_data_csv
 		hour = convert(Int64, row[1])
-		if hour == 0
-			continue
-		end
+
 		from_codes = String(row[2])
 		from_code_arr = String.(split(from_codes, "/"))
 		from_id = nothing
@@ -37,8 +35,9 @@ function process_spawn_rate!(spawn_data_file_path, station_dict)
 		end
 
 		from_station = station_dict[from_id]
+
 		if !haskey(from_station.spawn_rate, to_id)
-			from_station.spawn_rate[to_id] = zeros(24)
+			from_station.spawn_rate[to_id] = zeros(Float64, 24)
 		end
 		if hour == 0
 			from_station.spawn_rate[to_id][24] = rate

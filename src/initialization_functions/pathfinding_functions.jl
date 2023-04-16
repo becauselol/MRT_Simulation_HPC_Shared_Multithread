@@ -159,10 +159,9 @@ function get_interchange_paths(station_dict, lines,  commuter_graph)
 				possible_paths = commuter_graph.commuter_paths["$i_id.$i_code"]["$j_id.$j_code"]
 				
 				for path in possible_paths
-					direction = get_direction(lines[i_code]["FW"], i_id, String(split(path[2], ".")[1]))
+					direction = get_direction(lines[i_code][true], i_id, parse(Int64, String(split(path[2], ".")[1])))
 
-					board = "$(i_code)_$(direction)"
-
+					board = i_code * ((-1)^(!direction))
 					alight = nothing 
 
 					for p = 2:size(path)[1]
@@ -172,13 +171,13 @@ function get_interchange_paths(station_dict, lines,  commuter_graph)
 						next_details = String(split(next, ".")[2])
 
 						if p < size(path)[1] &&  prev_details != next_details
-							alight = String(split(prev, ".")[1])
+							alight = parse(Int64, String(split(prev, ".")[1]))
 							break
 						end 
 					end
 
 					if alight == nothing 
-						alight = j_id 
+						alight = j_id
 					end 
 
 					if !(board in keys(paths[i_id][j_id]))

@@ -2,43 +2,39 @@ using SharedArrays
 
 struct Event
 	time::Float64
-	event_type::Int64 # effectively decides the type of function we will use
+	event_type::Bool # effectively decides the type of function we will use
 	station::Int64 # set of parameters any function will use
-	target::Int64
 	train::Int64
 	is_real::Bool
-	function Event(time::Float64, event_type::Int64, station::Int64, target::Int64, train::Int64, is_real::Bool)
+	function Event(time::Float64, event_type::Bool, station::Int64, train::Int64, is_real::Bool)
 		return new(
 			time,
 			event_type,
 			station,
-			target,
 			train,
 			is_real
 			)
 	end
-	function Event(time::Int64, event_type::Int64, station::Int64, target::Int64, train::Int64)
+	function Event(time::Int64, event_type::Bool, station::Int64, train::Int64)
 		return new(
 			convert(Float64, time),
 			event_type,
 			station,
-			target,
 			train,
 			true
 			)
 	end
-	function Event(time::Float64, event_type::Int64, station::Int64, target::Int64, train::Int64)
+	function Event(time::Float64, event_type::Bool, station::Int64, train::Int64)
 		return new(
 			time,
 			event_type,
 			station,
-			target,
 			train,
 			true
 			)
 	end
 	function Event()
-		return new(0.0,0,0,0,0,false)
+		return new(0.0,false,0,0,false)
 	end
 end
 
@@ -74,6 +70,7 @@ mutable struct Train
 			SharedVector{Commuter}(capacity)
 			)
 	end
+
 	function Train(train_id::Int64, line::Int64, capacity::Int64)
 		return new(
 			train_id,
@@ -90,7 +87,7 @@ mutable struct Station
 	codes::Vector
 	name::String
 	stationCodes::Vector{String}
-	spawn_rate::Dict{String, Dict{Int64, Float64}}
+	spawn_rate::Dict{Int64, Vector{Float64}}
 	time_to_next_spawn::Dict{String, Int64}
 	neighbours::Dict{Int64, Dict{Bool, Vector}}
 	train_transit_time::Int64

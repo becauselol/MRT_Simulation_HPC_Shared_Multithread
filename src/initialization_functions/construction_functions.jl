@@ -11,13 +11,13 @@ function construct_station_dict(station_csv_location)
 	for row in station_csv
     	station_name = String(row[1])
 
-    	stationCodes = []
+    	stationCodes = String[]
         for c in eachsplit(row[2], "/")
             push!(stationCodes, String(c))
         end
 
-    	station_data["station_$station_count"] = Station(
-    			"station_$station_count",
+    	station_data[station_count] = Station(
+    			station_count,
 				station_name,
 				stationCodes
     		)
@@ -50,9 +50,12 @@ function construct_edges_from_edges_dict!(station_dict, line_names)
 	# create code mapping for stations
 	code_map = create_station_code_map(station_dict)
 	start_station_dict = Dict()
+	line_index_map = Dict()
+	line_count = 1
 	for line_code in line_names
-		start_station_id = construct_edges_for_line!(line_code, station_dict, code_map)
-		start_station_dict[line_code] = start_station_id
+		start_station_id = construct_edges_for_line!(line_code, station_dict, code_map, line_count)
+		start_station_dict[line_count] = start_station_id
+		line_count += 1
 	end
 
 	return start_station_dict
@@ -65,7 +68,7 @@ function add_station_neighbour!(from_station, to_station_id, line, direction, we
 	from_station.neighbours[line][direction] = [to_station_id, weight]
 end
 
-function construct_edges_for_line!(line_code, station_dict, code_map)
+function construct_edges_for_line!(line_code, station_dict, code_map, line_idx)
 
 	edges_csv = CSV.File("data/input/$(line_code)_data.csv", header=false)
 
@@ -75,7 +78,7 @@ function construct_edges_for_line!(line_code, station_dict, code_map)
 
 	first_station_id = code_map[first_station_code]
 	first_station = station_dict[first_station_id]
-	push!(first_station.codes, line_code)
+	push!(first_station.codes, line_idx)
 
 	for edge_details in edges_csv
     	from_station_code = String(edge_details[1])
@@ -88,9 +91,9 @@ function construct_edges_for_line!(line_code, station_dict, code_map)
     	from_station = station_dict[from_station_id]
     	to_station = station_dict[to_station_id]
 
-    	push!(to_station.codes, line_code)
-    	add_station_neighbour!(from_station, to_station_id, line_code, "FW", time_taken)
-    	add_station_neighbour!(to_station, from_station_id, line_code, "BW", time_taken)
+    	push!(to_station.codes, line_idx)
+    	add_station_neighbour!(from_station, to_station_id, line_idx, true, time_taken)
+    	add_station_neighbour!(to_station, from_station_id, line_idx, false, time_taken)
 	end
 
 	
@@ -104,21 +107,21 @@ function construct_lines_from_start_stations(station_dict, start_stations)
 	for (line_code, start_station_id) in start_stations 
 		lines[line_code] = Dict()
 
-		lines[line_code]["FW"] = [start_station_id]
+		lines[line_code][true] = [start_station_id]
 
 		curr_id = start_station_id
 		curr = station_dict[curr_id]
 
-		next_id = get_neighbour_id(curr, line_code, "FW")
+		next_id = get_neighbour_id(curr, line_code, true)
 
 		while next_id != nothing
 			next = station_dict[next_id]
-			push!(lines[line_code]["FW"], next_id)
+			push!(lines[line_code][true], next_id)
 			curr = next
-			next_id = get_neighbour_id(curr, line_code, "FW")
+			next_id = get_neighbour_id(curr, line_code, true)
 		end
 
-		lines[line_code]["BW"] = reverse(lines[line_code]["FW"])
+		lines[line_code][false] = reverse(lines[line_code][true])
 	end
 
 	return lines
@@ -130,6 +133,7 @@ function construct_commuter_graph(station_dict)
 	commuter_node_list = []
 
 	for (station_id, station) in station_dict 
+		# @debug "$(station.name), id: $(station_id), codes:$(station.codes)"
 		for code in station.codes
 			push!(commuter_node_list, "$(station_id).$(code)")
 			commuter_edge_dict["$(station_id).$(code)"] = Dict()
@@ -147,7 +151,7 @@ function construct_commuter_graph(station_dict)
 
 		for (line, line_dict) in station.neighbours
 			for (direction, values) in line_dict 
-				commuter_edge_dict["$(station_id).$(line)"]["$(values[1]).$(line)"] = values[2] + station.train_transit_time
+				commuter_edge_dict["$(station_id).$(line)"]["$(convert(Int64, values[1])).$(line)"] = values[2] + station.train_transit_time
 			end 	
 		end 
 	end 
