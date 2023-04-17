@@ -5,7 +5,8 @@
 function simulate_timestep!(time, metro, timestep=0.1)
 	# for all stations we try spawn event
 	@debug "$(time)"
-	@threads for (station_id, station) in metro.stations 
+	spawn_count = 0
+	for (station_id, station) in metro.stations 
 		for (target_id, target) in metro.stations 
 			if (target_id == station_id) 
 				continue 
@@ -13,13 +14,15 @@ function simulate_timestep!(time, metro, timestep=0.1)
 			if !(haskey(station.spawn_rate, target_id))
 				continue 
 			end 
-			event_spawn_commuters!(time, metro, station_id, target_id, timestep)
+			spawn = event_spawn_commuters!(time, metro, station_id, target_id, timestep)
+			spawn_count = spawn_count + spawn
 		end 
 	end 
-	@debug "done spawning"
+	@debug "done spawning $(spawn_count)"
 
 	# we check the event queue for any events to process
-	@threads for (station_id, station) in metro.stations 
+	term_station_count = 0
+	for (station_id, station) in metro.stations 
 
 		while size(station.event_queue)[1] > 0 && station.event_queue[1].time <= time 
 			station.event_queue, new_event = update_after_pop(station.event_queue)
@@ -36,23 +39,39 @@ function simulate_timestep!(time, metro, timestep=0.1)
 
 		end 
 	end 
-	@debug "trains"
+	@debug "trains term count: $(term_station_count)"
+
+	train_count = 0
+	for (train_id, train) in metro.trains 
+		train_count += get_shared_vector_count(train.commuters) 
+	end 
+	@debug "train commuters : $(train_count)"
+
+	station_count = 0
+	for (station_id, station) in metro.stations 
+		station_count += get_shared_vector_count(station.commuters["waiting"]) 
+		station_count += get_shared_vector_count(station.commuters["terminating"]) 
+	end 
+	@debug "station commuters : $(station_count)"
 
 	# process them accordingly
 
-	@threads for (station_id, station) in metro.stations 
+	for (station_id, station) in metro.stations 
 		station.event_queue = update_event_queue!(station.event_queue, station.event_buffer)
 	end 
 
 	@debug "updated queue"
 
 	# we then just terminate at the station
-
-	@threads for (station_id, station) in metro.stations 
-		event_terminate_commuters!(time, metro, station_id)
+	term_count = 0
+	for (station_id, station) in metro.stations 
+		term_count += event_terminate_commuters!(time, metro, station_id)
 	end 
 
-	@debug "terminate people"
+	@debug "terminate people $(term_count)"
+
+	# @assert term_count == term_station_count
+	return spawn_count, term_station_count
 end
 
 function get_shared_vector_count(shared_vector)
@@ -67,6 +86,7 @@ function get_shared_vector_count(shared_vector)
 end
 
 function add_event_to_buffer!(buffer, event, slot)
+	@assert buffer[slot].is_real == false
 	buffer[slot] = event
 end
 
@@ -100,8 +120,15 @@ end
 
 function simulate!(start_time, max_time, metro, timestep=0.1)
 	time = start_time
+	spawn_cum = 0
+	term_cum = 0
 	while time <= max_time 
-		simulate_timestep!(time, metro, timestep)
+		@info "$(time)"
+		spawn, term = simulate_timestep!(time, metro, timestep)
+		spawn_cum += spawn 
+		term_cum += term 
+
+		@info "spawned: $(spawn_cum), terminated: $(term_cum) "
 		time += timestep 
 	end 
 end 

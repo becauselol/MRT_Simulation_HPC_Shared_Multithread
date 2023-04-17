@@ -103,7 +103,11 @@ function alight_commuters!(train, station, paths)
 
 	train_slot = 1
 
-	for commuter in train.commuters 
+	for commuter in train.commuters
+		if commuter.is_real == false 
+			break 
+		end 
+
 		if commuter.target == current_id
 			push!(terminating_commuters, commuter)
 			continue
@@ -114,11 +118,12 @@ function alight_commuters!(train, station, paths)
 			push!(waiting_commuters, commuter)
 			continue
 		end
+
 		train.commuters[train_slot] = commuter 
 		train_slot += 1
 	end 
 
-	for i in train_slot:train.capacity 
+	for i in (train_slot):train.capacity 
 		train.commuters[i] = Commuter()
 	end 
 

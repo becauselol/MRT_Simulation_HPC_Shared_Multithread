@@ -19,7 +19,8 @@ function construct_station_dict(station_csv_location)
 				station_name,
 				stationCodes
     		)
-
+    	station_data[station_count].commuters["waiting"] = Commuter[]
+    	station_data[station_count].commuters["terminating"] = Commuter[]
     	station_count += 1
 	end
 
@@ -167,7 +168,12 @@ function assign_buffer_slot!(station_dict)
 			for (direction, values) in direction_dict
 				neighbour_id = values[1]
 				n = station_dict[neighbour_id]
-				n.neighbour_buffer_address[station_id] = slot
+
+				if !(haskey(n.neighbour_buffer_address, line_code))
+					n.neighbour_buffer_address[line_code] = Dict{Bool, Int64}()
+				end 
+
+				n.neighbour_buffer_address[line_code][!direction] = slot
 				slot += 1
 			end 
 		end 

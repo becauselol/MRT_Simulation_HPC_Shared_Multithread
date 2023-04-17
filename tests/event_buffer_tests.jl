@@ -44,7 +44,14 @@ event = Event(0.0, true, 1, 1)
 		@test get_shared_vector_count(station_dict[2].event_queue) == 0
 	end
 
+	
+
 	@testset "Testing Multiple Workers" begin
+		station_dict = Dict()
+		for i in workers()
+			station_dict[i] = Station(i,string(i))
+			station_dict[i].event_buffer = SharedVector{Event}(6)
+		end 
 		@sync for i in workers()
 			@async begin 
 				event = Event(i,true, i,i)

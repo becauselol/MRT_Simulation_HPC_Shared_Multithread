@@ -111,7 +111,7 @@ mutable struct Station
 	spawn_rate::Dict{Int64, Vector{Float64}}
 	time_to_next_spawn::Dict{String, Int64}
 	neighbours::Dict{Int64, Dict{Bool, Vector}}
-	neighbour_buffer_address::Dict{Int64, Int64}
+	neighbour_buffer_address::Dict{Int64, Dict{Bool, Int64}}
 	train_transit_time::Int64
 	commuters::Dict{String, Vector{Any}} # Dictionary, key: train to board, valu: List of commuters
 	event_queue::Vector{Event}
