@@ -11,7 +11,7 @@ function event_spawn_commuters!(time, metro, station, target, timestep=0.1)
 
 	number_spawn = rand(Exponential(rate*timestep), 1)[1]
 
-	@debug "time $(round(time; digits=2)): spawning commuter at Station $station that wants to go to $target"
+	# @debug "time $(round(time; digits=2)): spawning commuter at Station $station that wants to go to $target"
 
 	for i in 1:number_spawn
 		new_commuter = Commuter(
@@ -21,13 +21,13 @@ function event_spawn_commuters!(time, metro, station, target, timestep=0.1)
 			time,
 			0
 		)
-		station.commuters["waiting"] = add_commuter_to_station(s.commuters, "waiting", new_commuter)
+		s.commuters["waiting"] = add_commuter_to_station(s.commuters, "waiting", new_commuter)
 	end
 end 
 
 function event_terminate_commuters!(time, metro, station)
 	s = metro.stations[station]
-	station.commuters["waiting"] = terminate_commuters_from_station()
+	s.commuters["waiting"] = terminate_commuters_from_station()
 end
 
 function event_train_reach_station!(time, metro, train, station)
@@ -40,10 +40,10 @@ function event_train_reach_station!(time, metro, train, station)
 	neighbour_id = get_neighbour_id(s, line, direction)
 
 	if neighbour_id == nothing
-		if direction == "FW"
-			direction = "BW"
+		if direction == true
+			direction = false
 		else 
-			direction = "FW"
+			direction = true
 		end
 
 		t.direction = direction
@@ -58,10 +58,10 @@ function event_train_reach_station!(time, metro, train, station)
 
 	# add the train leave event into the event_queue
 	event = Event(time + t.train_transit_time, false, station, train)
-	heappush!(s.event_queue, event)
+	s.event_queue = update_after_push(s.event_queue, event)
 end 
 
-function event_train_leave_station(time, metro, train, station)
+function event_train_leave_station!(time, metro, train, station)
 	t = metro.trains[train]
 	s = metro.stations[station]
 
@@ -88,9 +88,9 @@ function event_train_leave_station(time, metro, train, station)
 	# send the event of train reach to another stations buffer
 	neighbour = metro.stations[neighbour_id]
 
-	travel_time = get_neighbour_weight(station, line, direction)
-	event = Event(time + travel_time, true, neighbour_id, train)
+	travel_time = get_neighbour_weight(s, line, direction)
+	event = Event(time + travel_time, true, convert(Int64, neighbour_id), convert(Int64, train))
 
 	slot = s.neighbour_buffer_address[neighbour_id]
-	add_event_to_buffer!(neighbour, event, slot)
+	add_event_to_buffer!(neighbour.event_buffer, event, slot)
 end

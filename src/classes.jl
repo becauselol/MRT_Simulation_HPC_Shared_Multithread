@@ -48,8 +48,28 @@ struct Commuter
 		return new(0, 0, 0.0, 0.0, 0.0, false)
 	end 
 
+	function Commuter(origin::Int64, target::Int64, spawn_time::Any, wait_start::Any, total_wait_time::Any )
+		return new(
+			origin, 
+			target, 
+			convert(Float64, spawn_time), 
+			convert(Float64, wait_start), 
+			convert(Float64, total_wait_time), 
+			true)
+	end 
+
 	function Commuter(origin::Int64, target::Int64, spawn_time::Float64, wait_start::Float64, total_wait_time::Float64 )
 		return new(origin, target, spawn_time, wait_start, total_wait_time, true)
+	end 
+
+	function Commuter(origin::Int64, target::Int64, spawn_time::Int64, wait_start::Int64, total_wait_time::Int64 )
+		return new(
+			origin, 
+			target, 
+			convert(Float64, spawn_time), 
+			convert(Float64, wait_start), 
+			convert(Float64, total_wait_time), 
+			true)
 	end 
 end
 
@@ -58,6 +78,7 @@ mutable struct Train
 	line::Int64
 	direction::Bool
 	capacity::Int64 # kinda unnecessary, since commuters is fixed size
+	train_transit_time::Int64
 	commuters::SharedVector{Commuter}
 	function Train(train_id::Int64, line::Int64, direction::Bool, capacity::Int64)
 		return new(
@@ -65,6 +86,7 @@ mutable struct Train
 			line,
 			direction,
 			capacity,
+			1,
 			SharedVector{Commuter}(capacity)
 			)
 	end
@@ -75,6 +97,7 @@ mutable struct Train
 			line,
 			true,
 			capacity,
+			1,
 			SharedVector{Commuter}(capacity)
 			)
 	end
