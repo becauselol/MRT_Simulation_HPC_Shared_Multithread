@@ -1,5 +1,3 @@
-using CSV
-
 function construct_station_dict(station_csv_location)
 	station_count = 1
 
@@ -157,4 +155,28 @@ function construct_commuter_graph(station_dict)
 	end 
 
 	return CommuterGraph(commuter_node_list, commuter_edge_dict)
+end 
+
+function assign_buffer_slot!(station_dict)
+	max_buffer_size = 0
+
+	for (station_id, station) in station_dict 
+		slot = 1
+
+		for (line_code, direction_dict) in station.neighbours
+			for (direction, values) in direction_dict
+				neighbour_id = values[1]
+				n = station_dict[neighbour_id]
+				n.neighbour_buffer_address[station_id] = slot
+				slot += 1
+			end 
+		end 
+		max_buffer_size = max(max_buffer_size, slot - 1)
+	end 
+
+	for (station_id, station) in station_dict 
+		station.event_buffer = SharedVector{Event}(max_buffer_size)
+	end 
+
+	return max_buffer_size
 end 

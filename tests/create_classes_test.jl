@@ -1,8 +1,8 @@
 @testset "Create Class Test" begin
 	@testset "Create Event Test" begin
-		@test Event(1, 1, 1, 1, 1) == Event(1.0, 1, 1, 1, 1, true)
-		@test Event(1.0, 1, 1, 1, 1) == Event(1.0, 1, 1, 1, 1, true)
-		@test Event() == Event(0.0, 0, 0, 0, 0, false)
+		@test Event(1, true, 1, 1) == Event(1.0, true, 1, 1, true)
+		@test Event(1.0, true, 1, 1) == Event(1.0, true, 1, 1, true)
+		@test Event() == Event(0.0,false,0,0,false)
 	end
 
 	@testset "Create Station" begin

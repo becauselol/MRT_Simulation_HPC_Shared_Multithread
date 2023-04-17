@@ -22,20 +22,20 @@ function get_shared_vector_count(shared_vector)
 	return count
 end
 
-function add_event_to_buffer!(event_buffer, event, station_id, slot)
-	event_buffer[slot, station_id] = event
+function add_event_to_buffer!(buffer, event, slot)
+	buffer[slot] = event
 end
 
-function update_event_queue!(queue, buffer, station_id)
+function update_event_queue!(queue, buffer)
 	# check what the buffer has
 
 	# if there are events in the buffer
-	if get_shared_vector_count(buffer[:,station_id]) > 0
+	if get_shared_vector_count(buffer) > 0
 		# update the event queue
-		for (idx, event) in enumerate(buffer[:,station_id])
+		for (idx, event) in enumerate(buffer)
 			if event.is_real
 				heappush!(queue, event)
-				buffer[idx, station_id] = Event()
+				buffer[idx] = Event()
 			end
 		end
 	end

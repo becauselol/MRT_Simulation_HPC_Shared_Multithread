@@ -56,7 +56,9 @@ function event_train_reach_station!(time, metro, train, station)
 	s.commuters["waiting"] = wait
 	s.commuters["terminating"] = terminate 
 
-	# change the event in the buffer to a train leave event
+	# add the train leave event into the event_queue
+	event = Event(time + t.train_transit_time, false, station, train)
+	heappush!(s.event_queue, event)
 end 
 
 function event_train_leave_station(time, metro, train, station)
@@ -84,4 +86,11 @@ function event_train_leave_station(time, metro, train, station)
 	s.commuters["waiting"] = board_commuters!(t, s, metro.paths)
 
 	# send the event of train reach to another stations buffer
+	neighbour = metro.stations[neighbour_id]
+
+	travel_time = get_neighbour_weight(station, line, direction)
+	event = Event(time + travel_time, true, neighbour_id, train)
+
+	slot = s.neighbour_buffer_address[neighbour_id]
+	add_event_to_buffer!(neighbour, event, slot)
 end
