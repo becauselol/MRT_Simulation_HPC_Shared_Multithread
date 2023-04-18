@@ -28,6 +28,4 @@ data
 
 .ipynb_checkpoints
 
-testbed.ipynb
-station_data_refactor.ipynb
-test_multithread.ipynb
+*.ipynb

@@ -2,17 +2,17 @@ include("import_all.jl")
 
 # io = open("log.txt", "w+")
 # logger = SimpleLogger(io)
-logger = ConsoleLogger(stdout, Logging.Info)
+logger = ConsoleLogger(stdout, Logging.Debug)
 # fileLogger = SimpleLogger(io, Logging.Debug)
 # global_logger(fileLogger)
 global_logger(logger)
 
-station_dict = construct_station_dict("data/input/station_data.csv")
+station_dict = construct_station_dict("data/test_input/station_data.csv")
 
 station_name_id_map = construct_station_name_id_map(station_dict)
 
 # construct the edges
-start_stations = construct_edges_from_edges_dict!(station_dict, ["tel", "ccl", "ewl", "nsl", "nel", "cgl", "dtl"])
+start_stations = construct_edges_from_edges_dict!(station_dict, ["red", "pur"], "data/test_input")
 
 lines = construct_lines_from_start_stations(station_dict, start_stations)
 
@@ -24,7 +24,7 @@ get_all_path_pairs!(commuter_graph)
 
 paths = get_interchange_paths(station_dict, lines, commuter_graph)
 
-max_time = 1500
+max_time = 1440
 start_time = 360
 timestep = 0.5
 
@@ -49,7 +49,7 @@ for line_code in keys(lines)
     build_min_heap!(station_dict[depot_id].event_queue)
 end
 
-process_spawn_rate!("data/input/spawn_data.csv", station_dict)
+process_spawn_rate!("data/test_input/spawn_data.csv", station_dict)
 
 max_buffer_size = assign_buffer_slot!(station_dict)
 

@@ -45,14 +45,14 @@ function create_station_code_map(station_dict)
 	return code_map
 end
 
-function construct_edges_from_edges_dict!(station_dict, line_names)
+function construct_edges_from_edges_dict!(station_dict, line_names, filepath = "data/input")
 	# create code mapping for stations
 	code_map = create_station_code_map(station_dict)
 	start_station_dict = Dict()
 	line_index_map = Dict()
 	line_count = 1
 	for line_code in line_names
-		start_station_id = construct_edges_for_line!(line_code, station_dict, code_map, line_count)
+		start_station_id = construct_edges_for_line!(line_code, station_dict, code_map, line_count, filepath)
 		start_station_dict[line_count] = start_station_id
 		line_count += 1
 	end
@@ -67,9 +67,9 @@ function add_station_neighbour!(from_station, to_station_id, line, direction, we
 	from_station.neighbours[line][direction] = [to_station_id, weight]
 end
 
-function construct_edges_for_line!(line_code, station_dict, code_map, line_idx)
+function construct_edges_for_line!(line_code, station_dict, code_map, line_idx, filepath = "data/input")
 
-	edges_csv = CSV.File("data/input/$(line_code)_data.csv", header=false)
+	edges_csv = CSV.File("$(filepath)/$(line_code)_data.csv", header=false)
 
 	# for each station in station_string
 	first_edge = edges_csv[1]

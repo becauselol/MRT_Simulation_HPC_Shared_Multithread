@@ -56,7 +56,7 @@ function board_commuters!(train, station, paths)
 	line_direction = train.line * ((-1)^(!train.direction))
 
 	train_capacity = get_shared_vector_count(train.commuters)
-
+	@debug "capacity: $(train_capacity)"
 	for commuter in station_commuters
 		if train_capacity >= train.capacity
 			push!(leftover_commuters, commuter)
@@ -67,12 +67,12 @@ function board_commuters!(train, station, paths)
 		commuter_target_lines = get_target_boarding_lines(station.station_id, commuter.target, paths)
 
 		if line_direction in commuter_target_lines
+			@debug "boarding"
 			train_capacity += 1
 			train.commuters[train_capacity] = commuter
 
 		else
 			push!(leftover_commuters, commuter)
-
 		end 
 	end
 	return leftover_commuters
@@ -95,8 +95,8 @@ function get_target_alighting_station(current_id, target_id, line_direction, pat
 end
 
 function alight_commuters!(train, station, paths)
-	waiting_commuters = Commuter[]
-	terminating_commuters = Commuter[]
+	waiting_commuters = station.commuters["waiting"]
+	terminating_commuters = station.commuters["terminating"]
 
 	current_id = station.station_id
 	line_direction = train.line * ((-1)^(!train.direction))

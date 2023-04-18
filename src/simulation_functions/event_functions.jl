@@ -1,9 +1,7 @@
-function event_spawn_commuters!(time, metro, station, target, timestep=0.1)
+function event_spawn_commuters!(time, hr, metro, station, target, timestep=0.1)
 	s = metro.stations[station]
 
-	hour = convert(Int32, floor(time/60))
-
-	rate = s.spawn_rate[target][hour]
+	rate = s.spawn_rate[target][hr]
 
 	if rate == 0 
 		return 0
@@ -11,7 +9,7 @@ function event_spawn_commuters!(time, metro, station, target, timestep=0.1)
 
 	number_spawn = rand(Poisson(rate*timestep), 1)[1]
 
-	# @debug "time $(round(time; digits=2)): spawning commuter at Station $station that wants to go to $target"
+	# @debug "time $(round(time; digits=2)): spawning $(number_spawn) at Station $station that wants to go to $target"
 	# @debug number_spawn
 	for i in 1:number_spawn
 		new_commuter = Commuter(

@@ -2,20 +2,23 @@
 # The new event function adds all the events into the queue
 
 
-function simulate_timestep!(time, metro, timestep=0.1)
+function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 	# for all stations we try spawn event
 	@debug "$(time)"
 	spawn_count = 0
-	for (station_id, station) in metro.stations 
-		for (target_id, target) in metro.stations 
-			if (target_id == station_id) 
-				continue 
+	if (time <= stop_spawn)
+		hour = convert(Int32, floor(time/60))
+		for (station_id, station) in metro.stations 
+			for (target_id, target) in metro.stations 
+				if (target_id == station_id) 
+					continue 
+				end 
+				if !(haskey(station.spawn_rate, target_id))
+					continue 
+				end 
+				spawn = event_spawn_commuters!(time, hour, metro, station_id, target_id, timestep)
+				spawn_count = spawn_count + spawn
 			end 
-			if !(haskey(station.spawn_rate, target_id))
-				continue 
-			end 
-			spawn = event_spawn_commuters!(time, metro, station_id, target_id, timestep)
-			spawn_count = spawn_count + spawn
 		end 
 	end 
 	@debug "done spawning $(spawn_count)"
@@ -71,7 +74,7 @@ function simulate_timestep!(time, metro, timestep=0.1)
 	@debug "terminate people $(term_count)"
 
 	# @assert term_count == term_station_count
-	return spawn_count, term_station_count
+	return spawn_count, term_count
 end
 
 function get_shared_vector_count(shared_vector)
@@ -123,12 +126,12 @@ function simulate!(start_time, max_time, metro, timestep=0.1)
 	spawn_cum = 0
 	term_cum = 0
 	while time <= max_time 
-		@info "$(time)"
+		# @info "$(time)"
 		spawn, term = simulate_timestep!(time, metro, timestep)
 		spawn_cum += spawn 
 		term_cum += term 
 
-		@info "spawned: $(spawn_cum), terminated: $(term_cum) "
+		# @info "spawned: $(spawn_cum), terminated: $(term_cum) "
 		time += timestep 
 	end 
 end 

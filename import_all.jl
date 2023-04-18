@@ -10,6 +10,7 @@ end
 @everywhere using Dates
 @everywhere using SharedArrays
 @everywhere using .Threads
+@everywhere include("src/classes.jl")
 @everywhere include("src/data_storage_functions/data_store_functions.jl")
 @everywhere include("src/data_storage_functions/hdf5_functions.jl")
 @everywhere include("src/initialization_functions/commuter_functions.jl")
@@ -22,4 +23,3 @@ end
 @everywhere include("src/simulation_functions/station_functions.jl")
 @everywhere include("src/utility_functions/heap_functions.jl")
 @everywhere include("src/utility_functions/utility_functions.jl")
-@everywhere include("src/classes.jl")
