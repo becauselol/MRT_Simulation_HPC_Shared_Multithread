@@ -2,7 +2,7 @@
 # The new event function adds all the events into the queue
 
 
-function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
+function simulate_timestep!(time, metro, data_store, timestep=0.1, stop_spawn = 1440)
 	# for all stations we try spawn event
 	@debug "$(time)"
 	
@@ -36,11 +36,11 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 				if new_event.event_type
 					@assert new_event.station == station_id 
 	 
-					event_train_reach_station!(time, metro, new_event.train, new_event.station)
+					event_train_reach_station!(time, metro, data_store, new_event.train, new_event.station)
 				else 
 					@assert new_event.station == station_id
 
-					event_train_leave_station!(time, metro, new_event.train, new_event.station)
+					event_train_leave_station!(time, metro, data_store, new_event.train, new_event.station)
 				end 
 
 			end 
@@ -49,10 +49,12 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 
 	# process them accordingly
 
-	for (station_id, station) in metro.stations 
-		station.event_queue = update_event_queue!(station.event_queue, station.event_buffer)
+	@threads for station_id in 1:length(metro.stations)
+	    begin
+	        station = metro.stations[station_id]
+			station.event_queue = update_event_queue!(station.event_queue, station.event_buffer)
+		end 
 	end 
-
 
 	# we then just terminate at the station
 	term_count = zeros(nthreads())
@@ -62,6 +64,16 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 			term_count[threadid()] += event_terminate_commuters!(time, metro, station_id)
 		end
 	end 
+
+	@debug data_store
+	@threads for station_id in 1:length(metro.stations)
+		begin 
+			station = metro.stations[station_id]
+			count = size(station.commuters["waiting"])[1] + size(station.commuters["terminating"])[1]
+			push!(data_store.station_commuter_count[station_id], count)
+		end 
+	end 
+
 
 	# @assert term_count == term_station_count
 	return sum(spawn_count), sum(term_count)
@@ -111,13 +123,13 @@ function update_after_push(queue, event)
 end 
 
 
-function simulate!(start_time, max_time, metro, timestep=0.1)
+function simulate!(start_time, max_time, metro, data_store, timestep=0.1)
 	time = start_time
 	spawn_cum = 0
 	term_cum = 0
 	while time <= max_time 
 		# @info "$(time)"
-		spawn, term = simulate_timestep!(time, metro, timestep)
+		spawn, term = simulate_timestep!(time, metro, data_store, timestep)
 		spawn_cum += spawn 
 		term_cum += term 
 

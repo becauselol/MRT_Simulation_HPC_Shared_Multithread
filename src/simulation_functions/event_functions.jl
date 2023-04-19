@@ -31,7 +31,7 @@ function event_terminate_commuters!(time, metro, station)
 	return count
 end
 
-function event_train_reach_station!(time, metro, train, station)
+function event_train_reach_station!(time, metro, data_store, train, station)
 	t = metro.trains[train]
 	s = metro.stations[station]
 
@@ -54,6 +54,7 @@ function event_train_reach_station!(time, metro, train, station)
 	# @debug "time $(round(time; digits=2)): Train $train reaching Station $station"
 
 	wait, terminate = alight_commuters!(t, s, metro.paths)
+
 	s.commuters["waiting"] = wait
 	s.commuters["terminating"] = terminate 
 
@@ -64,7 +65,7 @@ function event_train_reach_station!(time, metro, train, station)
 	return size(s.commuters["terminating"])[1]
 end 
 
-function event_train_leave_station!(time, metro, train, station)
+function event_train_leave_station!(time, metro, data_store, train, station)
 	t = metro.trains[train]
 	s = metro.stations[station]
 
