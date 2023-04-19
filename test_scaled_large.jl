@@ -25,7 +25,7 @@ get_all_path_pairs!(commuter_graph)
 paths = get_interchange_paths(station_dict, lines, commuter_graph)
 
 max_time = 1500
-start_time = 360
+start_time = 240
 timestep = 0.5
 
 
@@ -55,8 +55,10 @@ max_buffer_size = assign_buffer_slot!(station_dict)
 
 metro = Metro(station_dict, trains, lines, paths);
 
-
+data = []
 # data_store = Data_Store(Dict(), Dict(), Dict(), Dict(), Dict())
 @info "initialization finish at time $(now())"
 
-simulate!(start_time, max_time, metro, timestep)
+simulate!(start_time, max_time, metro, data, timestep)
+
+display(data)

@@ -2,12 +2,12 @@
 # The new event function adds all the events into the queue
 
 
-function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
+function simulate_timestep!(time, metro, data, timestep=0.1, start_spawn=360, stop_spawn = 1440)
 	# for all stations we try spawn event
 	@debug "$(time)"
 	
 	spawn_count = zeros(nthreads())
-	if (time <= stop_spawn)
+	if (time <= stop_spawn) && (start_spawn <= time)
 		hour = convert(Int64, floor(time/60))
 		@threads for station_id in 1:length(metro.stations)
 		    begin
@@ -24,7 +24,8 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 			end
 		end 
 	end 
-
+	# count = size(metro.stations[66].commuters["waiting"])[1] + size(metro.stations[66].commuters["terminating"])[1]
+	# push!(data, count)
 	# we check the event queue for any events to process
 	@threads for station_id in 1:length(metro.stations)
 	    begin
@@ -49,11 +50,13 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 
 	# process them accordingly
 
-	for (station_id, station) in metro.stations 
+	@threads for station_id in 1:length(metro.stations)
+		station = metro.stations[station_id]
 		station.event_queue = update_event_queue!(station.event_queue, station.event_buffer)
 	end 
 
-
+	count = size(metro.stations[94].commuters["terminating"])[1]
+	push!(data, count)
 	# we then just terminate at the station
 	term_count = zeros(nthreads())
 	@threads for station_id in 1:length(metro.stations)
@@ -62,6 +65,7 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 			term_count[threadid()] += event_terminate_commuters!(time, metro, station_id)
 		end
 	end 
+
 
 	# @assert term_count == term_station_count
 	return sum(spawn_count), sum(term_count)
@@ -111,13 +115,13 @@ function update_after_push(queue, event)
 end 
 
 
-function simulate!(start_time, max_time, metro, timestep=0.1)
+function simulate!(start_time, max_time, metro, data, timestep=0.1)
 	time = start_time
 	spawn_cum = 0
 	term_cum = 0
 	while time <= max_time 
 		# @info "$(time)"
-		spawn, term = simulate_timestep!(time, metro, timestep)
+		spawn, term = simulate_timestep!(time, metro, data, timestep)
 		spawn_cum += spawn 
 		term_cum += term 
 

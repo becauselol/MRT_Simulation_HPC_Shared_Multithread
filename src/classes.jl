@@ -113,12 +113,12 @@ mutable struct Station
 	neighbours::Dict{Int64, Dict{Bool, Vector}}
 	neighbour_buffer_address::Dict{Int64, Dict{Bool, Int64}}
 	train_transit_time::Int64
-	commuters::Dict{String, Vector{Any}} # Dictionary, key: train to board, valu: List of commuters
+	commuters::Dict{String, Vector{Commuter}} # Dictionary, key: train to board, valu: List of commuters
 	event_queue::Vector{Event}
 	event_buffer::SharedVector{Event}
 
 	function Station(station_id::Int64, name::String, stationCodes::Vector{String})
-		return new(
+		x = new(
 				station_id,
 				[],
 				name,
@@ -132,9 +132,12 @@ mutable struct Station
 				Event[],
 				SharedVector{Event}(0)
 			)
+		x.commuters["waiting"] = Commuter[]
+		x.commuters["terminating"] = Commuter[]
+		return x
 	end
 	function Station(station_id::Int64, name::String)
-		return new(
+		x = new(
 				station_id,
 				[],
 				name,
@@ -148,6 +151,9 @@ mutable struct Station
 				Event[],
 				SharedVector{Event}(0)
 			)
+		x.commuters["waiting"] = Commuter[]
+		x.commuters["terminating"] = Commuter[]
+		return x
 	end
 end
 

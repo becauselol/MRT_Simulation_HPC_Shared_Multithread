@@ -1,5 +1,5 @@
 include("../import_all.jl")
-
+@everywhere using Test
 include("create_classes_test.jl")
 include("station_neighbour_tests.jl")
 include("event_buffer_tests.jl")
