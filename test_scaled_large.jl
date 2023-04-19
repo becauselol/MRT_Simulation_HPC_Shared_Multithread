@@ -60,3 +60,4 @@ metro = Metro(station_dict, trains, lines, paths);
 @info "initialization finish at time $(now())"
 
 simulate!(start_time, max_time, metro, timestep)
+@info "simulation finish at time $(now())"
