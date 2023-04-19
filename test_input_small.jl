@@ -56,7 +56,7 @@ max_buffer_size = assign_buffer_slot!(station_dict)
 metro = Metro(station_dict, trains, lines, paths);
 
 
-# data_store = Data_Store(Dict(), Dict(), Dict(), Dict(), Dict())
+data_store = Data_Store(length(station_dict))
 @info "initialization finish at time $(now())"
 
 simulate!(start_time, max_time, metro, timestep)

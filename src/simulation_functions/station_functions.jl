@@ -130,3 +130,11 @@ function alight_commuters!(train, station, paths)
 	return waiting_commuters, terminating_commuters
 end
 
+function reset_wait_time(time, commuters)
+	result = Commuter[]
+	for c in commuters
+		push!(result, Commuter(c.origin, c.target, c.spawn_time, time, c.total_wait_time))
+	end 
+
+	return result
+end 
