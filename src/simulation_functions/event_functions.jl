@@ -1,9 +1,9 @@
 function event_spawn_commuters!(time, hr, metro, station, target, timestep=0.1)
 	s = metro.stations[station]
 
-	rate = s.spawn_rate[target][hr]
+	rate = s.spawn_rate[target, hr]
 
-	if rate == 0 
+	if rate == 0 || rate == -1
 		return 0
 	end 
 

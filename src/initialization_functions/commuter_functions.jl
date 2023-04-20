@@ -2,6 +2,12 @@ function process_spawn_rate!(spawn_data_file_path, station_dict)
 	code_map = create_station_code_map(station_dict)
 	spawn_data_csv = CSV.File(spawn_data_file_path, header=false)
 
+	# let us try matrix instead and also just max it out...
+	for (station_id, station) in station_dict 
+		station.spawn_rate = Matrix{Float64}(undef, length(station_dict), 24)
+		fill!(station.spawn_rate, -1)
+	end 
+
 	for row in spawn_data_csv
 		hour = convert(Int64, row[1])
 
@@ -34,13 +40,10 @@ function process_spawn_rate!(spawn_data_file_path, station_dict)
 
 		from_station = station_dict[from_id]
 
-		if !haskey(from_station.spawn_rate, to_id)
-			from_station.spawn_rate[to_id] = zeros(Float64, 24)
-		end
 		if hour == 0
-			from_station.spawn_rate[to_id][24] = rate
+			from_station.spawn_rate[to_id, 24] = rate
 		else
-			from_station.spawn_rate[to_id][hour] = rate
+			from_station.spawn_rate[to_id, hour] = rate
 		end
 	end
 end

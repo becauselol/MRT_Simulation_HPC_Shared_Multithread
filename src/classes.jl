@@ -108,7 +108,7 @@ mutable struct Station
 	codes::Vector
 	name::String
 	stationCodes::Vector{String}
-	spawn_rate::Dict{Int64, Vector{Float64}}
+	spawn_rate::Matrix{Float64}
 	time_to_next_spawn::Dict{String, Int64}
 	neighbours::Dict{Int64, Dict{Bool, Vector}}
 	neighbour_buffer_address::Dict{Int64, Dict{Bool, Int64}}
@@ -123,7 +123,7 @@ mutable struct Station
 				[],
 				name,
 				stationCodes,
-				Dict(),
+				Matrix{Float64}(undef, 0, 0),
 				Dict(),
 				Dict(),
 				Dict(),
@@ -142,7 +142,7 @@ mutable struct Station
 				[],
 				name,
 				String[],
-				Dict(),
+				Matrix{Float64}(undef, 0, 0),
 				Dict(),
 				Dict(),
 				Dict(),

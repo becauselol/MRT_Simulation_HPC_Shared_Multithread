@@ -12,16 +12,10 @@ function simulate_timestep!(time, metro, data, timestep=0.1, start_spawn=360, st
 	@threads for station_id in 1:length(metro.stations)
 	    begin
 	    	station = metro.stations[station_id] 
-	    	if (time <= stop_spawn) && (start_spawn <= time)
+	    	if (start_spawn <= time) && (time <= stop_spawn)
 				hour = convert(Int64, floor(time/60))
 		       
 				for target_id in 1:length(metro.stations)
-					if (target_id == station_id) 
-						continue 
-					end 
-					if !(haskey(station.spawn_rate, target_id))
-						continue 
-					end 
 					spawn_count[threadid()] += event_spawn_commuters!(time, hour, metro, station_id, target_id, timestep)
 				end 
 			end
@@ -59,7 +53,7 @@ function simulate_timestep!(time, metro, data, timestep=0.1, start_spawn=360, st
 			term_count[threadid()] += event_terminate_commuters!(time, metro, station_id)
 		end
 	end 
-	
+
 	@threads for station_id in 1:length(metro.stations)
 		station = metro.stations[station_id]
 		station.event_queue = update_event_queue!(station.event_queue, station.event_buffer)
