@@ -97,7 +97,7 @@ metro = Metro(station_dict, trains, lines, paths);
 
 build_min_heap!(event_queue)
 
-data_store = Data_Store(Dict(), Dict(), Dict(), Dict(), Dict())
+data_store = Data_Store()
 @info "$(now()): initialization finish "
 
 @info "$(now()): starting simulation "
