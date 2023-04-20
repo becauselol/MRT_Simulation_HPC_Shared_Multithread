@@ -114,7 +114,7 @@ mutable struct Station
 	neighbour_buffer_address::Dict{Int64, Dict{Bool, Int64}}
 	train_transit_time::Int64
 	commuters::Dict{String, Vector{Commuter}} # Dictionary, key: train to board, valu: List of commuters
-	event_queue::Vector{Event}
+	event_queue::PriorityQueue{Event, Float64}
 	event_buffer::SharedVector{Event}
 
 	function Station(station_id::Int64, name::String, stationCodes::Vector{String})
@@ -129,7 +129,7 @@ mutable struct Station
 				Dict(),
 				1,
 				Dict(),
-				Event[],
+				PriorityQueue{Event, Float64}(),
 				SharedVector{Event}(0)
 			)
 		x.commuters["waiting"] = Commuter[]
@@ -148,7 +148,7 @@ mutable struct Station
 				Dict(),
 				1,
 				Dict(),
-				Event[],
+				PriorityQueue{Event, Float64}(),
 				SharedVector{Event}(0)
 			)
 		x.commuters["waiting"] = Commuter[]

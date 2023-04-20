@@ -25,8 +25,8 @@ function simulate_timestep!(time, metro, data, timestep=0.1, start_spawn=360, st
 	@threads for station_id in 1:length(metro.stations)
 	    begin
 	    	station = metro.stations[station_id] 
-			while size(station.event_queue)[1] > 0 && station.event_queue[1].time <= time 
-				station.event_queue, new_event = update_after_pop(station.event_queue)
+			while length(station.event_queue) > 0 && peek(station.event_queue)[1].time <= time 
+				new_event = dequeue!(station.event_queue)
 
 				if new_event.event_type
 					@assert new_event.station == station_id 
@@ -93,7 +93,7 @@ function update_event_queue!(queue, buffer)
 		# update the event queue
 		for (idx, event) in enumerate(buffer)
 			if event.is_real
-				heappush!(queue, event)
+				enqueue!(queue, event, event.time)
 				buffer[idx] = Event()
 			end
 		end
@@ -103,12 +103,12 @@ function update_event_queue!(queue, buffer)
 end
 
 function update_after_pop(queue)
-	event = heappop!(queue)
+	event = dequeue!(queue)
 	return queue, event
 end
 
 function update_after_push(queue, event)
-	heappush!(queue, event)
+	enqueue!(queue, event, event.time)
 	return queue 
 end 
 

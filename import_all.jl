@@ -3,6 +3,7 @@ if nworkers() == 1
 	addprocs(11)
 end 
 @everywhere using Distributions
+@everywhere using DataStructures
 @everywhere using HDF5
 @everywhere using CSV
 @everywhere using DataFrames

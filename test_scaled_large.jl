@@ -45,8 +45,11 @@ for line_code in keys(lines)
 		trains[k] = v 
 	end 
 
-	append!(station_dict[depot_id].event_queue, events)
-    build_min_heap!(station_dict[depot_id].event_queue)
+	for event in events
+		enqueue!(station_dict[depot_id].event_queue, event, event.time)
+	end
+	# append!(station_dict[depot_id].event_queue, events)
+    # build_min_heap!(station_dict[depot_id].event_queue)
 end
 
 process_spawn_rate!("data/input/spawn_data.csv", station_dict)
