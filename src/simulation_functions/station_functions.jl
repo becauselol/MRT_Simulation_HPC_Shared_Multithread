@@ -16,10 +16,7 @@ end
 
 
 function add_commuter_to_station(station_commuters, type, commuter)
-	commuter_vector = Commuter[]
-	if haskey(station_commuters, type)
-		commuter_vector = station_commuters[type]
-	end
+	commuter_vector = station_commuters[type]
 
 	push!(commuter_vector, commuter)
 
@@ -31,15 +28,17 @@ function terminate_commuters_from_station()
 end
 
 function get_target_boarding_lines(current_id, target_id, paths)
-	if !haskey(paths, current_id)
+	target_id_dict = get(paths, current_id, nothing)
+	if target_id_dict == nothing
 		return []
 	end 
 
-	if !haskey(paths[current_id], target_id)
+	line_dict = get(target_id_dict, target_id, nothing)
+	if line_dict == nothing
 		return []
-	end 
+	end
 
-	return keys(paths[current_id][target_id])
+	return keys(line_dict)
 end
 
 function board_commuters!(train, station, paths)
@@ -79,19 +78,18 @@ function board_commuters!(train, station, paths)
 end
 
 function get_target_alighting_station(current_id, target_id, line_direction, paths)
-	if !haskey(paths, current_id)
+	target_id_dict = get(paths, current_id, nothing)
+	if target_id_dict == nothing
 		return nothing
 	end 
 
-	if !haskey(paths[current_id], target_id)
-		return nothing 
-	end 
+	line_dict = get(target_id_dict, target_id, nothing)
+	if line_dict == nothing
+		return nothing
+	end
 
-	if !haskey(paths[current_id][target_id], line_direction)
-		return nothing 
-	end 
-
-	return paths[current_id][target_id][line_direction]
+	stations = get(line_dict, line_direction, nothing)
+	return stations
 end
 
 function alight_commuters!(train, station, paths)
