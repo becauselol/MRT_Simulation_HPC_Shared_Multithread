@@ -8,19 +8,18 @@ function event_spawn_commuters!(time, hr, metro, station, target, timestep=0.1)
 	end 
 
 	number_spawn = rand(Poisson(rate*timestep), 1)[1]
-
+	new_commuters = Vector{Commuter}(undef, number_spawn)
 	# @debug "time $(round(time; digits=2)): spawning $(number_spawn) at Station $station that wants to go to $target"
 	# @debug number_spawn
-	for i in 1:number_spawn
-		new_commuter = Commuter(
+	new_commuter = Commuter(
 			station,
 			target,
 			time,
 			time,
 			0
 		)
-		s.commuters["waiting"] = add_commuter_to_station(s.commuters, "waiting", new_commuter)
-	end
+	fill!(new_commuters, new_commuter)
+	append!(s.commuters["waiting"], new_commuters)
 	return number_spawn
 end 
 
