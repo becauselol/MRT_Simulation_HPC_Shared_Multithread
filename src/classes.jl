@@ -118,7 +118,7 @@ mutable struct Station
 	event_buffer::SharedVector{Event}
 
 	function Station(station_id::Int64, name::String, stationCodes::Vector{String})
-		return new(
+		x = new(
 				station_id,
 				[],
 				name,
@@ -132,9 +132,12 @@ mutable struct Station
 				Event[],
 				SharedVector{Event}(0)
 			)
+		x.commuters["waiting"] = Commuter[]
+		x.commuters["terminating"] = Commuter[]
+		return x
 	end
 	function Station(station_id::Int64, name::String)
-		return new(
+		x = new(
 				station_id,
 				[],
 				name,
@@ -148,6 +151,9 @@ mutable struct Station
 				Event[],
 				SharedVector{Event}(0)
 			)
+		x.commuters["waiting"] = Commuter[]
+		x.commuters["terminating"] = Commuter[]
+		return x
 	end
 end
 
