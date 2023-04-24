@@ -7,10 +7,12 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 	@debug "$(time)"
 	
 	spawn_count = zeros(nthreads())
-	if (time <= stop_spawn)
-		hour = convert(Int64, floor(time/60))
-		@threads for station_id in 1:length(metro.stations)
-		    begin
+	term_count = zeros(nthreads())
+
+	@threads for station_id in 1:length(metro.stations)
+	    begin
+	    	if (time <= stop_spawn)
+				hour = convert(Int64, floor(time/60))
 		        station = metro.stations[station_id]  
 				for (target_id, target) in metro.stations 
 					if (target_id == station_id) 
@@ -22,14 +24,8 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 					spawn_count[threadid()] += event_spawn_commuters!(time, hour, metro, station_id, target_id, timestep)
 				end 
 			end
-		end 
-	end 
 
-	# we check the event queue for any events to process
-	@threads for station_id in 1:length(metro.stations)
-	    begin
-	        station = metro.stations[station_id] 
-
+			# we check the event queue for any events to process
 			while size(station.event_queue)[1] > 0 && station.event_queue[1].time <= time 
 				station.event_queue, new_event = update_after_pop(station.event_queue)
 
@@ -42,26 +38,26 @@ function simulate_timestep!(time, metro, timestep=0.1, stop_spawn = 1440)
 
 					event_train_leave_station!(time, metro, new_event.train, new_event.station)
 				end 
-
 			end 
+ 			
+
+			# we then just terminate at the station
+			term_count[threadid()] += event_terminate_commuters!(time, metro, station_id)
+		end 
+	end 
+
+	
+	# phase 2 update event queue
+	@threads for station_id in 1:length(metro.stations)
+	    begin
+	        station = metro.stations[station_id] 
+			station.event_queue = update_event_queue!(station.event_queue, station.event_buffer)
 		end
 	end 
 
 	# process them accordingly
 
-	for (station_id, station) in metro.stations 
-		station.event_queue = update_event_queue!(station.event_queue, station.event_buffer)
-	end 
 
-
-	# we then just terminate at the station
-	term_count = zeros(nthreads())
-	@threads for station_id in 1:length(metro.stations)
-	    begin
-	        station = metro.stations[station_id] 
-			term_count[threadid()] += event_terminate_commuters!(time, metro, station_id)
-		end
-	end 
 
 	# @assert term_count == term_station_count
 	return sum(spawn_count), sum(term_count)
