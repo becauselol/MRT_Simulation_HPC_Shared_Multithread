@@ -1,7 +1,7 @@
 using Distributed
-if nworkers() == 1
-	addprocs(11)
-end 
+# if nworkers() == 1
+# 	addprocs(11)
+# end 
 @everywhere using Distributions
 @everywhere using HDF5
 @everywhere using CSV
