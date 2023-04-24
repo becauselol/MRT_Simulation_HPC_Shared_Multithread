@@ -24,8 +24,8 @@ get_all_path_pairs!(commuter_graph)
 
 paths = get_interchange_paths(station_dict, lines, commuter_graph)
 
-max_time = 1500
-start_time = 360
+max_time = 1440
+start_time = 345
 timestep = 0.5
 
 
